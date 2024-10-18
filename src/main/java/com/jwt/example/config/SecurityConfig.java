@@ -57,5 +57,7 @@ public class SecurityConfig {
         return daoAuthenticationProvider;
     }
 //he AuthenticationManager will delegate the authentication process to an AuthenticationProvider
-// (in this case, your DaoAuthenticationProvider)
+// in this case, your DaoAuthenticationProvider,which then delegates this to the CustomUserDetailService
+// to load the user from the database based on their email.
+
 }
