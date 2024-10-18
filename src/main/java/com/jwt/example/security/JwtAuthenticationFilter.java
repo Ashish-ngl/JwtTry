@@ -88,9 +88,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (validateToken) {
 
                 //set the authentication
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                // This creates an Authentication object that represents a fully authenticated user based on the JWT token.
+                // This object will be used by Spring Security to manage the user’s authentication status during the request.
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
+                        null, userDetails.getAuthorities()); //since the user is already authenticated by the token, you don't need the password here, so it's set to null.
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                //sets additional details about the authentication request. In this case, it's setting
+                // information about the web request (such as the user's IP address, session ID, etc.).
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                //Once this is set, Spring Security considers the user to be authenticated for the duration of the request.
+                //SecurityContextHolder is a central place where Spring Security stores details about the current security context (i.e., who is authenticated).
 
 
             } else {
