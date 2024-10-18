@@ -5,8 +5,11 @@ import com.jwt.example.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -18,6 +21,10 @@ public class SecurityConfig {
     private JwtAuthenticationEntryPoint point;
     @Autowired
     private JwtAuthenticationFilter filter;
+    @Autowired
+    private UserDetailsService userDetailsService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -26,8 +33,9 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
     //CSRF protection is typically used for stateful applications with sessions.
                 .authorizeRequests().
+                requestMatchers("/auth/login").permitAll().
                 requestMatchers("/home/**").authenticated().
-                requestMatchers("/auth/login").permitAll()
+                requestMatchers("/auth/create-user").permitAll()
                 .anyRequest()
         //Any other request (i.e., any request that isn't explicitly defined) also requires the user to be authenticated.
                 .authenticated()
@@ -41,5 +49,13 @@ public class SecurityConfig {
         //finalizes the configuration and builds the SecurityFilterChain with the defined settings
     }
 
-
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(){
+        DaoAuthenticationProvider daoAuthenticationProvider=new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+        return daoAuthenticationProvider;
+    }
+//he AuthenticationManager will delegate the authentication process to an AuthenticationProvider
+// (in this case, your DaoAuthenticationProvider)
 }

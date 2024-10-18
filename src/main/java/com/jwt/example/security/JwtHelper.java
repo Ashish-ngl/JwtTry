@@ -3,6 +3,7 @@ package com.jwt.example.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -42,8 +43,13 @@ public class JwtHelper {
     // parses the entire JWT and retrieves all the claims. It uses the secret key to
     // ensure the JWT is valid and hasn't been tampered with. It returns the claims (payload) of the token.
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return Jwts.parserBuilder() // Use parserBuilder instead of parser
+                .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())) // Set the signing key using the updated method
+                .build() // Build the parser
+                .parseClaimsJws(token) // Parse the token
+                .getBody(); // Retrieve the claims from the token
     }
+
 
     //check if the token has expired
     private Boolean isTokenExpired(String token) {
@@ -70,7 +76,8 @@ public class JwtHelper {
                 .setSubject(subject) //Sets the subject, which is usually the username.
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, secret) //Signs the token using the HS512 algorithm and the secret key.
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS512)
+                //Signs the token using the HS512 algorithm and the secret key.
                 .compact(); //Serializes the JWT into a URL-safe string.
     }
 
