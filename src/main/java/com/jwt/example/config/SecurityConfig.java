@@ -35,7 +35,8 @@ public class SecurityConfig {
                 .authorizeRequests().
                 requestMatchers("/auth/login").permitAll().
                 requestMatchers("/home/**").authenticated().
-                requestMatchers("/auth/create-user").permitAll()
+                requestMatchers("/auth/create-user").permitAll().
+                requestMatchers("auth/refresh").permitAll()
                 .anyRequest()
         //Any other request (i.e., any request that isn't explicitly defined) also requires the user to be authenticated.
                 .authenticated()

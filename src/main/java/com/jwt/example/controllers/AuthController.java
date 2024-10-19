@@ -5,6 +5,7 @@ import com.jwt.example.entities.RefreshToken;
 import com.jwt.example.entities.User;
 import com.jwt.example.models.JwtRequest;
 import com.jwt.example.models.JwtResponse;
+import com.jwt.example.models.RefreshTokenRequest;
 import com.jwt.example.repositories.UserRepository;
 import com.jwt.example.security.JwtHelper;
 import com.jwt.example.services.RefreshTokenService;
@@ -90,6 +91,22 @@ public class AuthController {
             throw new BadCredentialsException(" Invalid Username or Password  !!");
         }
 
+    }
+    @PostMapping("/refresh")
+    //passing the RT in the request
+    public JwtResponse refreshJwtToken(@RequestBody RefreshTokenRequest request){
+        //verify it
+        RefreshToken refreshToken= refreshTokenService.verifyRefreshToken(request.getRefreshToken());
+        //if valid , retrieve the user associated with it
+        User user=refreshToken.getUser();
+        //generate new Jwt for the user
+        String token= helper.generateToken(user);
+        //send the Jwt back along with the same RT, since its expiry may have extended
+        return JwtResponse.builder()
+                .refreshToken(refreshToken.getRefreshToken())
+                .jwtToken(token)
+                .username(user.getEmail())
+                .build();
     }
 
     @ExceptionHandler(BadCredentialsException.class)
